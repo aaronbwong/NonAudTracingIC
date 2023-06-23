@@ -33,3 +33,8 @@ input: Tile-scan image from Zeiss slidescanner (.czi file)
 - Zen: Batch "Image Export" of the series of .czi files (new series of .tif files)
 	+ Select "Use Input Folder as Output Folder"
 	+ Naming... -> Format: {%N}
+- ImageJ? Zen?: Orient the samples
+- Matlab (AP_histology): downsample, reorder, orient (90degrees), rotate(small), store metadata.
+
+
+TODO: code to regenerate downsampled, reorder figures based on metadata and raw images (TIF)

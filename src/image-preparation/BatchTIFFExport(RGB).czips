@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ProcessingParameters Function="SingleFileExport">
+  <FunctionParameters Function="SingleFileExport">
+    <DestFolder>W:\Documents - Work\Projects\NonAudTracingIC\Analysis\gen\image-preparation\temp</DestFolder>
+    <SubsetSelectionMode>All</SubsetSelectionMode>
+    <SubSetString></SubSetString>
+    <MultichannelMode>ChannelComposite</MultichannelMode>
+    <ProcessingModeFlags>WithDisplaySettings, BurnInAnnotations</ProcessingModeFlags>
+    <MCSelectionMode>SubsetDefinition</MCSelectionMode>
+    <UseChannelNames>false</UseChannelNames>
+    <BurnInDataZone>false</BurnInDataZone>
+    <ImageEncoderClsid>6b9e169f-8f55-404c-af09-771545a0aba8</ImageEncoderClsid>
+    <ExportImageWriterOptions>
+      <AllowFormatsOtherThanRGB24orGray8>false</AllowFormatsOtherThanRGB24orGray8>
+      <TiffCompressionOption>Lzw</TiffCompressionOption>
+    </ExportImageWriterOptions>
+    <PanOption>All</PanOption>
+    <TileMode>Retile</TileMode>
+    <RetileSettings>
+      <TileCountX>1</TileCountX>
+      <TileCountY>1</TileCountY>
+      <OverlapXPercent>0</OverlapXPercent>
+      <OverlapYPercent>0</OverlapYPercent>
+      <MaxTileCountX>500</MaxTileCountX>
+      <MaxTileCountY>500</MaxTileCountY>
+    </RetileSettings>
+    <Zoom>1</Zoom>
+    <GenXMLFiles>false</GenXMLFiles>
+    <CreateSubFolder>false</CreateSubFolder>
+    <CreateZipArchive>false</CreateZipArchive>
+    <Prefix>2023-141-09279_j3-Stitched-Scene-01</Prefix>
+  </FunctionParameters>
+</ProcessingParameters>

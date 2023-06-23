@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ProcessingParameters Function="SplitScenes">
+  <FunctionParameters Function="SplitScenes">
+    <TargetFolder>W:\RawData\EpiFluoData\2023-141\exports\2023-141-09279_j3</TargetFolder>
+    <IsSceneInfoIncluded>false</IsSceneInfoIncluded>
+    <OverwriteFiles>false</OverwriteFiles>
+    <Compression>None</Compression>
+  </FunctionParameters>
+</ProcessingParameters>
