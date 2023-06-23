@@ -14,7 +14,7 @@ st = AP_loadStructureTree([allen_atlas_path filesep 'structure_tree_safe_2017.cs
 
 % Set paths for histology images and directory to save slice/alignment
 im_path = 'gen\cell-count\input';
-slice_path = 'gen\alignment\temp\slices';
+slice_path = 'gen\image-preparation\output';
 
 %% 2) Preprocess slide images to produce slice images
 
@@ -47,7 +47,7 @@ AP_grab_histology_ccf(tv,av,st,slice_path);
 
 % Align CCF slices and histology slices
 % (first: automatically, by outline)
-AP_auto_align_histology_ccf(slice_path);
+AP_auto_align_histology_ccf(slice_path); %produces 2D affine transform between CCF image and slice
 % (second: curate manually)
 AP_manual_align_histology_ccf(tv,av,st,slice_path);
 
@@ -58,24 +58,19 @@ AP_manual_align_histology_ccf(tv,av,st,slice_path);
 AP_view_aligned_histology(st,slice_path);
 
 % Display histology within 3D CCF
-AP_view_aligned_histology_volume(tv,av,st,slice_path,1);
+% AP_view_aligned_histology_volume(tv,av,st,slice_path,1);
 
-% Get probe trajectory from histology, convert to CCF coordinates
-AP_get_probe_histology(tv,av,st,slice_path);
-
-% Align histology to electrophysiology
-use_probe = 1;
-AP_align_probe_histology(st,slice_path, ...
-    spike_times,spike_templates,template_depths, ...
-    lfp,channel_positions(:,2), ...
-    use_probe);
-
-% Extract slices from full-resolution images
-% (not worth it at the moment, each slice is 200 MB)
-% AP_grab_fullsize_histology_slices(im_path)
+% Extract results from ImageJ Cell Counter
+cellcountpath = 'gen\cell-count\output\';
+histology_points = AW_cellcounter2histology(slice_path,cellcountpath,resize_factor);
 
 % Convert points in histology images to CCF coordinates
 ccf_points = AP_histology2ccf(histology_points,slice_path);
+
+% Display points in 3D with brain mesh outline
+AP_view_celldistribution_volume(tv,cell2mat(ccf_points));
+
+
 % Concatenate points and round to nearest integer coordinate
 ccf_points_cat = round(cell2mat(ccf_points));
 % Get indicies from subscripts
