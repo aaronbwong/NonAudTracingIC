@@ -8,4 +8,5 @@ This is the readme file accompanying the analysis pipeline for a anatomical trac
 4. ```summary```: combining data from previous two steps (```alignment``` and ```cell-count```).
 
 ## Dependency
-AP_histology requires "Curve Fitting Toolbox"
+- AP_histology requires "Curve Fitting Toolbox"
+- AP_histology requires [ColorBrewer/BrewerMap](https://github.com/DrosteEffect/BrewerMap) by DrosteEffect
