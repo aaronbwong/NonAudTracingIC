@@ -1,13 +1,38 @@
-function AW_reorderHistology(im_fn,im_rgb,im_out_path)
+function AW_reorderHistology(im_out_path)
     
-    n_slices = length(im_fn);
-    nrows = floor(sqrt(n_slices));
-    ncols = ceil( n_slices / nrows );
+    slice_order_fn = [im_out_path filesep 'slice_order.csv'];
+    if exist(slice_order_fn,"file")
+        slice_order = readtable(slice_order_fn);
+    else
+        disp('Downsample images first!')
+        return
+    end
 
+    n_im = size(slice_order,1);
+    h = waitbar(0,'Loading images...');
+
+    im_fn = cellfun(@(path,fn) [path,filesep, fn], ...
+            slice_order.im_path(:),slice_order.ori_filename(:),'uni',false);
+    out_fn = cellfun(@(fn) [im_out_path,filesep, fn], ...
+            slice_order.out_fn(:),'uni',false);
+    resize_factor = slice_order.resize_factor;
+    im_rgb = cell(n_im,1);
+    for curr_im = 1:n_im
+        im_rgb{curr_im} = imread(out_fn{curr_im});
+        waitbar(curr_im/n_im,h,['Loading images (' num2str(curr_im) '/' num2str(n_im) ')...']);
+    end
+    close(h);
+
+    nrows = floor(sqrt(n_im));
+    ncols = ceil( n_im / nrows );
+
+    h_fig = figure;
     curr_montage = montage(im_rgb,'Size',[nrows,Inf]);
     set(curr_montage,'ButtonDownFcn',@slice_click);
-    h_fig = gcf; 
+%     h_fig = gcf; 
     set(h_fig,'KeyPressFcn',@keypress)
+    title('Left click: select slice; Right click: swap with slice; Middle click: rotate 90 degrees. Esc: Save and exit.')
+
     C = curr_montage.CData;
     width = size(C,2);
     height = size(C,1);
@@ -15,10 +40,11 @@ function AW_reorderHistology(im_fn,im_rgb,im_out_path)
     montage_data = struct;
     montage_data.h_fig = h_fig;
     montage_data.curr_montage = curr_montage;
-    montage_data.n_slices = n_slices;
+    montage_data.n_slices = n_im;
     montage_data.im_fn = im_fn;
     montage_data.im_rgb = im_rgb;
     montage_data.im_out_path = im_out_path;
+    montage_data.resize_factor = resize_factor;
     montage_data.nrows = nrows;
     montage_data.ncols = ncols;
     montage_data.width = width;
@@ -38,19 +64,45 @@ function slice_click(curr_montage,eventdata)
 montage_data = guidata(curr_montage);
 
 
-if eventdata.Button == 1
+if eventdata.Button == 1 % left click
     x = eventdata.IntersectionPoint(1);
     y = eventdata.IntersectionPoint(2);
     row = ceil(y / (montage_data.height/montage_data.nrows));
     col = ceil(x / (montage_data.width/montage_data.ncols));
     slice_num = (row-1)*montage_data.ncols + col;
-    if montage_data.currSlice == 0
-        montage_data.currSlice = slice_num;
-        guidata(montage_data.curr_montage, montage_data);
-    else
+ 
+    title(montage_data.curr_montage.Parent,['Left click: select slice (', num2str(slice_num) ,');',...
+        ' Right click: swap with slice;',...
+        'Middle click: rotate 90 degrees.',...
+        'Esc: Save and exit.'])
+
+
+    montage_data.currSlice = slice_num;
+    guidata(montage_data.curr_montage, montage_data);
+end
+
+
+if eventdata.Button == 3 % right click
+    x = eventdata.IntersectionPoint(1);
+    y = eventdata.IntersectionPoint(2);
+    row = ceil(y / (montage_data.height/montage_data.nrows));
+    col = ceil(x / (montage_data.width/montage_data.ncols));
+    slice_num = (row-1)*montage_data.ncols + col;
+
+    if montage_data.currSlice ~= 0
         swap_slices(curr_montage,slice_num,montage_data.currSlice);
     end
 
+end
+
+if eventdata.Button == 2 % middle click
+    x = eventdata.IntersectionPoint(1);
+    y = eventdata.IntersectionPoint(2);
+    row = ceil(y / (montage_data.height/montage_data.nrows));
+    col = ceil(x / (montage_data.width/montage_data.ncols));
+    slice_num = (row-1)*montage_data.ncols + col;
+    
+    rotate_slice(curr_montage,slice_num)
 end
 
 end
@@ -99,7 +151,8 @@ montage_data = guidata(montage_fig);
 
 im_out_path = montage_data.im_out_path;
 im_rgb = montage_data.im_rgb;
-
+im_fn = montage_data.im_fn;
+resize_factor = montage_data.resize_factor;
 switch eventdata.Key
     case 'escape'
             
@@ -110,24 +163,37 @@ switch eventdata.Key
     % Write all slice images to separate files
     
     disp('Saving slice images...');
-    n_img = length(im_rgb);
-    out_fn = cell(n_img,1);
-    for curr_im = 1:length(im_rgb)
-        curr_fn = [im_out_path filesep num2str(curr_im,'s%03d') '.tif'];
-        out_fn{curr_im} = curr_fn;
-        imwrite(im_rgb{curr_im},curr_fn,'tif');
-    end
+    save_slice_images(im_fn, resize_factor, im_rgb, im_out_path);
     disp('Done.');
-
-    save_fn = [im_out_path filesep 'slice_order.csv'];
-    [~,ori_fn,ori_ext] = fileparts(montage_data.im_fn);
-    ori_filename = cellfun(@(fn,ext) [fn ext], ...
-    ori_fn(:),ori_ext(:),'uni',false);
-    order = (1:length(ori_filename))';
-    csvtable = table(ori_filename,order,out_fn);
-    writetable(csvtable,save_fn);
-
     close(montage_fig);
 end
 end
 
+function rotate_slice(curr_montage,a)
+montage_data = guidata(curr_montage);
+nRot = 3;
+
+% rotate data
+im_rbg_A = montage_data.im_rgb{a};
+im_rbg_A = rot90(im_rbg_A,nRot);
+montage_data.im_rgb{a} = im_rbg_A;
+
+% rotate image in montage
+[xRangeA,yRangeA] = img_range(curr_montage,a);
+imgA = montage_data.curr_montage.CData(yRangeA,xRangeA,:);
+
+xMin = min(xRangeA);
+width = max(xRangeA) - xMin;
+yMin = min(yRangeA);
+height = max(yRangeA)- yMin;
+
+minDim = min(width,height);
+xRangeB = xMin:(xMin+minDim-1);
+yRangeB = yMin:(yMin+minDim-1);
+
+imgA = rot90(imgA,nRot);
+montage_data.curr_montage.CData(yRangeB,xRangeB,:) = imgA(1:minDim,1:minDim,:);
+
+guidata(curr_montage,montage_data);
+
+end

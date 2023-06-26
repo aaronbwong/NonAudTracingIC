@@ -39,7 +39,7 @@ AW_process_histology(im_path,resize_factor,slice_images,slice_path);
 
 % (optional) Rotate, center, pad, flip slice images
 % AP_rotate_histology(slice_path);
-
+AW_reorderHistology(slice_path)
 %% 3) Align CCF to slices
 
 % Find CCF slices corresponding to each histology slice
