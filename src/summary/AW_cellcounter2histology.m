@@ -1,4 +1,4 @@
-function histology_points = AW_cellcounter2histology(slice_path,cellcountpath,resize_factor)
+function [histology_points,slice_order] = AW_cellcounter2histology(slice_path,cellcountpath,resize_factor)
 %
 % slice_path: path to folder that contains 
 %       1) downsampled images for alignment
@@ -29,6 +29,8 @@ for ii = 1:n_cellcount
 %     resize_factor = slice_order.resize_factor(ii);
     if ~isempty(im_num)
         slice_order.histology_points{im_num} = resize_factor*hist_points{ii};
+        [~,name,ext] = fileparts(cellcount_fn{ii});
+        slice_order.cellcount_fn{im_num} = [name,ext];
     end
 end
 histology_points = slice_order.histology_points;

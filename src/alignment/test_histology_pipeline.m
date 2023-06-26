@@ -62,7 +62,7 @@ AP_view_aligned_histology(st,slice_path);
 
 % Extract results from ImageJ Cell Counter
 cellcountpath = 'gen\cell-count\output\';
-histology_points = AW_cellcounter2histology(slice_path,cellcountpath,resize_factor);
+[histology_points,slice_order] = AW_cellcounter2histology(slice_path,cellcountpath,resize_factor);
 
 % Convert points in histology images to CCF coordinates
 ccf_points = AP_histology2ccf(histology_points,slice_path);
