@@ -68,7 +68,7 @@ cellcountpath = 'gen\cell-count\output\';
 ccf_points = AP_histology2ccf(histology_points,slice_path);
 
 % Display points in 3D with brain mesh outline
-AP_view_celldistribution_volume(tv,cell2mat(ccf_points));
+h_scatter = AP_view_celldistribution_volume(tv,cell2mat(ccf_points));
 
 
 % Concatenate points and round to nearest integer coordinate

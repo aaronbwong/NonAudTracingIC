@@ -1,4 +1,4 @@
-function AP_view_celldistribution_volume(tv,ccf_points_cat)
+function h_scatter = AP_view_celldistribution_volume(tv,ccf_points_cat)
 % AP_view_celldistribution_volume(tv,ccf_points_cat)
 %
 % Plot histology warped onto CCF volume
@@ -28,7 +28,7 @@ h.Enable = 'on';
 
 % Draw all datapoints
 % ccf_points_cat is in native CCF order [AP/DV/ML] 
-scatter3(axes_atlas,ccf_points_cat(:,1),... % AP
+h_scatter = scatter3(axes_atlas,ccf_points_cat(:,1),... % AP
                     ccf_points_cat(:,3),... % ML
                     ccf_points_cat(:,2),... % DV
                     5,'red','filled','o');  
