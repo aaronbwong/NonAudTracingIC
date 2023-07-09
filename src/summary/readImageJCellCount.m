@@ -15,5 +15,9 @@ S = readstruct(filename);
 if ~exist('typeIdx','var') || isempty(typeIdx);typeIdx = 1;end
 
 im_fn = S.Image_Properties.Image_Filename;
-MarkerXY = [ [S.Marker_Data.Marker_Type(typeIdx).Marker.MarkerX]',...
+if isfield(S.Marker_Data.Marker_Type,'Marker')
+    MarkerXY = [ [S.Marker_Data.Marker_Type(typeIdx).Marker.MarkerX]',...
              [S.Marker_Data.Marker_Type(typeIdx).Marker.MarkerY]' ];
+else
+    MarkerXY = NaN(0,2);
+end
