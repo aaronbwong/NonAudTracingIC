@@ -1,4 +1,4 @@
-function h_scatter = AP_view_celldistribution_volume(tv,ccf_points_cat)
+function h_scatter = AW_view_celldistribution_volume(tv,ccf_points_cat)
 % AP_view_celldistribution_volume(tv,ccf_points_cat)
 %
 % Plot histology warped onto CCF volume

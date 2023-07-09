@@ -8,13 +8,14 @@ addpath('submodules\AP_histology\allenCCF_repo_functions');
 
 % Load CCF atlas
 allen_atlas_path = 'data\AllenCCF';
+allen_atlas_path = 'C:\Documents - Work\Software\Codes\Matlab\neuropixels_trajectory_explorer';
 tv = readNPY([allen_atlas_path filesep 'template_volume_10um.npy']);
 av = readNPY([allen_atlas_path filesep 'annotation_volume_10um_by_index.npy']);
 st = AP_loadStructureTree([allen_atlas_path filesep 'structure_tree_safe_2017.csv']);
 
 % Set paths for histology images and directory to save slice/alignment
-im_path = 'gen\cell-count\input';
-slice_path = 'gen\image-preparation\output';
+im_path = 'gen\cell-count\input\2023-141-09279';
+slice_path = 'gen\image-preparation\output\2023-141-09279';
 
 %% 2) Preprocess slide images to produce slice images
 
@@ -39,7 +40,7 @@ AW_process_histology(im_path,resize_factor,slice_images,slice_path);
 
 % (optional) Rotate, center, pad, flip slice images
 % AP_rotate_histology(slice_path);
-AW_reorderHistology(slice_path)
+AW_reorderHistology(slice_path);
 %% 3) Align CCF to slices
 
 % Find CCF slices corresponding to each histology slice
@@ -61,14 +62,14 @@ AP_view_aligned_histology(st,slice_path);
 % AP_view_aligned_histology_volume(tv,av,st,slice_path,1);
 
 % Extract results from ImageJ Cell Counter
-cellcountpath = 'gen\cell-count\output\';
+cellcountpath = 'gen\cell-count\output\2023-141-09279\';
 [histology_points,slice_order] = AW_cellcounter2histology(slice_path,cellcountpath,resize_factor);
 
 % Convert points in histology images to CCF coordinates
 ccf_points = AP_histology2ccf(histology_points,slice_path);
 
 % Display points in 3D with brain mesh outline
-h_scatter = AP_view_celldistribution_volume(tv,cell2mat(ccf_points));
+h_scatter = AW_view_celldistribution_volume(tv,cell2mat(ccf_points));
 
 
 % Concatenate points and round to nearest integer coordinate
