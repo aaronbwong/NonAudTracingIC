@@ -41,10 +41,20 @@ AW_process_histology(im_path,resize_factor,slice_images,slice_path);
 % (optional) Rotate, center, pad, flip slice images
 % AP_rotate_histology(slice_path);
 AW_reorderHistology(slice_path);
+%% 3a) DeepSlice
+% system('conda activate deepslice');
+savepath = pwd;
+codepath = [savepath,filesep,'src\alignment\run_deep_slice.py'];
+cd(slice_path);
+system(['python ','"',codepath,'"']);
+cd(savepath);
+
 %% 3) Align CCF to slices
 
 % Find CCF slices corresponding to each histology slice
-AP_grab_histology_ccf(tv,av,st,slice_path);
+% AP_grab_histology_ccf(tv,av,st,slice_path);
+slice_plane_fn = [slice_path,filesep,'DeepSliceResults_normAngle_ordered_spacing_extrapolated.xml'];
+AP_grab_histology_ccf(tv,av,st,slice_path,slice_plane_fn)
 
 % Align CCF slices and histology slices
 % (first: automatically, by outline)
