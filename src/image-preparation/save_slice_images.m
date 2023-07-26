@@ -1,10 +1,10 @@
-function save_slice_images(im_fn, resize_factor, im_rgb, im_out_path)
+function save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,flipHori)
     n_img = length(im_rgb);
     out_fn_dir = cell(n_img,1);
     for curr_im = 1:length(im_rgb)
-        curr_fn = [im_out_path filesep num2str(curr_im,'s%03d') '.tif'];
+        curr_fn = [im_out_path filesep 'Brain_' num2str(curr_im,'s%03d') '.jpg'];
         out_fn_dir{curr_im} = curr_fn;
-        imwrite(im_rgb{curr_im},curr_fn,'tif');
+        imwrite(im_rgb{curr_im},curr_fn,'jpg');
     end
     
     % Save a record of file correspondance
@@ -28,5 +28,8 @@ function save_slice_images(im_fn, resize_factor, im_rgb, im_out_path)
             resize_factor = repmat(resize_factor, n_img,1);
         end
     csvtable = table(order,im_path,ori_filename,resize_factor,out_fn);
+    if (exist('flipHori','var') && ~isempty(flipHori))
+        csvtable.flipHori = flipHori;
+    end
     writetable(csvtable,slice_order_fn);
 end

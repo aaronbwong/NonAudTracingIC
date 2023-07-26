@@ -17,6 +17,11 @@ function AW_reorderHistology(im_out_path)
             slice_order.out_fn(:),'uni',false);
     resize_factor = slice_order.resize_factor;
     im_rgb = cell(n_im,1);
+    if(isfield(slice_order,'flipHori'))
+        flipHori = slice_order.flipHori;
+    else
+        flipHori = zeros(n_im,1);
+    end
     for curr_im = 1:n_im
         im_rgb{curr_im} = imread(out_fn{curr_im});
         waitbar(curr_im/n_im,h,['Loading images (' num2str(curr_im) '/' num2str(n_im) ')...']);
@@ -31,7 +36,7 @@ function AW_reorderHistology(im_out_path)
     set(curr_montage,'ButtonDownFcn',@slice_click);
 %     h_fig = gcf; 
     set(h_fig,'KeyPressFcn',@keypress)
-    title('Left click: select slice; Right click: swap with slice; Middle click: rotate 90 degrees. Esc: Save and exit.')
+    title('Left click: select slice; Right click: swap with slice; Middle click: flip slice. Esc: Save and exit.')
 
     C = curr_montage.CData;
     width = size(C,2);
@@ -44,6 +49,7 @@ function AW_reorderHistology(im_out_path)
     montage_data.im_fn = im_fn;
     montage_data.im_rgb = im_rgb;
     montage_data.im_out_path = im_out_path;
+    montage_data.flipHori = flipHori;
     montage_data.resize_factor = resize_factor;
     montage_data.nrows = nrows;
     montage_data.ncols = ncols;
@@ -102,7 +108,8 @@ if eventdata.Button == 2 % middle click
     col = ceil(x / (montage_data.width/montage_data.ncols));
     slice_num = (row-1)*montage_data.ncols + col;
     
-    rotate_slice(curr_montage,slice_num)
+%     rotate_slice(curr_montage,slice_num)
+    flip_slice(curr_montage,slice_num)
 end
 
 end
@@ -153,6 +160,7 @@ im_out_path = montage_data.im_out_path;
 im_rgb = montage_data.im_rgb;
 im_fn = montage_data.im_fn;
 resize_factor = montage_data.resize_factor;
+flipHori = montage_data.flipHori;
 switch eventdata.Key
     case 'escape'
             
@@ -163,7 +171,7 @@ switch eventdata.Key
     % Write all slice images to separate files
     
     disp('Saving slice images...');
-    save_slice_images(im_fn, resize_factor, im_rgb, im_out_path);
+    save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,flipHori);
     disp('Done.');
     close(montage_fig);
 end
@@ -193,6 +201,37 @@ yRangeB = yMin:(yMin+minDim-1);
 
 imgA = rot90(imgA,nRot);
 montage_data.curr_montage.CData(yRangeB,xRangeB,:) = imgA(1:minDim,1:minDim,:);
+
+guidata(curr_montage,montage_data);
+
+end
+
+function flip_slice(curr_montage,a)
+montage_data = guidata(curr_montage);
+flipDim = 2; % 2: left-right
+
+% flip data
+im_rbg_A = montage_data.im_rgb{a};
+im_rbg_A = flip(im_rbg_A,flipDim);
+montage_data.im_rgb{a} = im_rbg_A;
+
+% flip image in montage
+[xRangeA,yRangeA] = img_range(curr_montage,a);
+imgA = montage_data.curr_montage.CData(yRangeA,xRangeA,:);
+
+% xMin = min(xRangeA);
+% width = max(xRangeA) - xMin;
+% yMin = min(yRangeA);
+% height = max(yRangeA)- yMin;
+% 
+% minDim = min(width,height);
+% xRangeB = xMin:(xMin+minDim-1);
+% yRangeB = yMin:(yMin+minDim-1);
+
+imgA = flip(imgA,flipDim);
+montage_data.curr_montage.CData(yRangeA,xRangeA,:) = imgA;
+
+montage_data.flipHori(a) = 1-montage_data.flipHori(a);
 
 guidata(curr_montage,montage_data);
 

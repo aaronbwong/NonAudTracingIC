@@ -15,6 +15,8 @@ function AW_process_histology(im_path,resize_factor,slice_images,save_dir)
 
 % Get and sort image files
 im_path_dir = dir([im_path filesep '*.tif']);
+im_path_dir = [im_path_dir;dir([im_path filesep '*.jpg'])];
+im_path_dir = [im_path_dir;dir([im_path filesep '*.png'])];
 im_fn = natsortfiles(cellfun(@(path,fn) [path filesep fn], ...
     {im_path_dir.folder},{im_path_dir.name},'uni',false));
 
@@ -28,7 +30,11 @@ else
 end
 
 % If image is RGB, set flag
-im_is_rgb = strcmp(im_info(1).PhotometricInterpretation,'RGB');
+if isfield(im_info,'PhotometricInterpretation')
+    im_is_rgb = strcmp(im_info(1).PhotometricInterpretation,'RGB');
+else
+    im_is_rgb = 1;
+end
 
 % Set resize factor from user (if provided), or if no resize factor
 % provided and pixel size is available, resize to match CCF
