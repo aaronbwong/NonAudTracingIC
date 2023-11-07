@@ -1,4 +1,4 @@
-function AW_process_histology(im_path,resize_factor,slice_images,save_dir)
+function AW_process_histology(im_path,resize_factor,slice_images,save_dir,prefix)
 % AP_process_histology(im_path,resize_factor,slice_images,save_dir)
 %
 % im_path - path with images of slides (tif/tiff/ome.tiff)
@@ -194,7 +194,7 @@ elseif slice_images
     
     % Write all slice images to separate files
     disp('Saving slice images...');
-    save_slice_images(im_fn, resize_factor, im_rgb, save_dir);
+    save_slice_images(im_fn, resize_factor, im_rgb, save_dir,prefix);
     disp('Done.');
     
     

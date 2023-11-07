@@ -17,6 +17,8 @@ function AW_reorderHistology(im_out_path)
             slice_order.out_fn(:),'uni',false);
     resize_factor = slice_order.resize_factor;
     im_rgb = cell(n_im,1);
+    prefix = regexp(slice_order.out_fn{1},'(.*)_s[0-9]{2,3}.jpg$','tokens');
+    prefix = prefix{1}{1};
     if(isfield(slice_order,'flipHori'))
         flipHori = slice_order.flipHori;
     else
@@ -49,6 +51,7 @@ function AW_reorderHistology(im_out_path)
     montage_data.im_fn = im_fn;
     montage_data.im_rgb = im_rgb;
     montage_data.im_out_path = im_out_path;
+    montage_data.prefix = prefix;
     montage_data.flipHori = flipHori;
     montage_data.resize_factor = resize_factor;
     montage_data.nrows = nrows;
@@ -160,6 +163,7 @@ im_out_path = montage_data.im_out_path;
 im_rgb = montage_data.im_rgb;
 im_fn = montage_data.im_fn;
 resize_factor = montage_data.resize_factor;
+prefix = montage_data.prefix;
 flipHori = montage_data.flipHori;
 switch eventdata.Key
     case 'escape'
@@ -171,7 +175,7 @@ switch eventdata.Key
     % Write all slice images to separate files
     
     disp('Saving slice images...');
-    save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,flipHori);
+    save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,prefix,flipHori);
     disp('Done.');
     close(montage_fig);
 end

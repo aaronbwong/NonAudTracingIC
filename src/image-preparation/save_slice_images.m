@@ -1,8 +1,9 @@
-function save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,flipHori)
+function save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,prefix,flipHori)
     n_img = length(im_rgb);
     out_fn_dir = cell(n_img,1);
+    if (~exist('prefix','var') || isempty(prefix)); prefix = 'Brain'; end
     for curr_im = 1:length(im_rgb)
-        curr_fn = [im_out_path filesep 'Brain_' num2str(curr_im,'s%03d') '.jpg'];
+        curr_fn = [im_out_path, filesep, prefix, '_', num2str(curr_im,'s%03d'), '.jpg'];
         out_fn_dir{curr_im} = curr_fn;
         imwrite(im_rgb{curr_im},curr_fn,'jpg');
     end

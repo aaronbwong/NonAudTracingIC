@@ -5,6 +5,7 @@
 addpath('submodules\npy-matlab\npy-matlab');
 addpath('submodules\AP_histology');
 addpath('submodules\AP_histology\allenCCF_repo_functions');
+addpath(genpath('src\'));
 
 % Load CCF atlas
 allen_atlas_path = 'data\AllenCCF';
@@ -36,7 +37,7 @@ slice_images = true; % (images are already individual slices)
 % Preprocess images
 
 % AP_process_histology(im_path,resize_factor,slice_images,slice_path);
-AW_process_histology(im_path,resize_factor,slice_images,slice_path);
+AW_process_histology(im_path,resize_factor,slice_images,slice_path,prefix);
 
 % (optional) Rotate, center, pad, flip slice images
 % AP_rotate_histology(slice_path);
