@@ -20,7 +20,6 @@ prefix = '2023-141-09279-j3';
 % -- Compnuter specific ---
 allen_atlas_path = 'data\AllenCCF';
 allen_atlas_path = 'C:\Documents - Work\Software\Codes\Matlab\neuropixels_trajectory_explorer';
-allen_atlas_path = 'W:\Documents - Work\Software\Codes\Matlab\neuropixels_trajectory_explorer';
 % -------------------------
 tv = readNPY([allen_atlas_path filesep 'template_volume_10um.npy']);
 av = readNPY([allen_atlas_path filesep 'annotation_volume_10um_by_index.npy']);
@@ -85,10 +84,8 @@ AP_view_aligned_histology(st,slice_path);
 % AP_view_aligned_histology_volume(tv,av,st,slice_path,1);
 
 % Extract results from ImageJ Cell Counter
-% --- Data specific ---
 cellcountpath = 'gen\cell-count\output\2023-141-09279\';
 cellcountpath = 'W:\AnalyzedData\Histology\2023-141-09279\CellCounterResults';
-% ---------------------
 [histology_points,slice_order] = AW_cellcounter2histology(slice_path,cellcountpath,resize_factor);
 
 % Convert points in histology images to CCF coordinates

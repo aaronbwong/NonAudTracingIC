@@ -62,7 +62,7 @@ function AW_reorderHistology(im_out_path)
     montage_data.CData_ori = C;
     montage_data.currSlice = 0;
     guidata(curr_montage, montage_data);
-    updateTitle(curr_montage);
+
 end
 
 
@@ -96,7 +96,7 @@ if eventdata.Button == 3 % right click
     if montage_data.currSlice ~= 0
         swap_slices(curr_montage,slice_num,montage_data.currSlice);
     end
-    updateTitle(curr_montage)
+
 end
 
 if eventdata.Button == 2 % middle click
@@ -241,15 +241,10 @@ end
 
 function updateTitle(curr_montage)
 montage_data = guidata(curr_montage);
-
 titleStr = 'Left click: select slice';
-if montage_data.currSlice > 0
-   titleStr = [titleStr, '(',num2str(montage_data.currSlice),')']; 
+if montage_data.currSlice == 0
+    title('Left click: select slice; Right click: swap with slice; Middle click: flip slice. Esc: Save and exit.')
+else
+    
 end
-titleStr = [titleStr,...
-            '. Right click: swap with slice. ',...
-            'Middle click/RightArrow: flip slice. ',...
-            'Esc: Save and exit.'];
-
-title(montage_data.curr_montage.Parent,titleStr);
 end
