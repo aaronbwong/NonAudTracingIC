@@ -14,7 +14,7 @@
    print(count+ " files in directory");
    n = 0;
    processFiles(dir);
-   print(processcount+" files processed");
+   print(processCount+" files processed");
    
    function countFiles(dir) {
       list = getFileList(dir);
@@ -22,7 +22,7 @@
           if (endsWith(list[i], "/"))
               countFiles(""+dir+list[i]);
           else {
-          	if(endsWith(path, ".tif")||endsWith(path, ".jpg")||endsWith(path, ".png")||endsWith(path, ".czi")){
+          	if(endsWith(list[i], ".tif")||endsWith(list[i], ".jpg")||endsWith(list[i], ".png")||endsWith(list[i], ".czi")){
             	count++;
           	}
           }
@@ -35,6 +35,7 @@
 	print("  Rotate "+Rotate+" times.");
 	print("  Flip "+FlipHori+" times horizontally.");
 	list = getFileList(dir);
+	print("  processing "+processCount+"/"+count+" files.");
       for (i=0; i<list.length; i++) {
           if (endsWith(list[i], "/"))
              processFiles(""+dir+list[i]);
@@ -51,7 +52,8 @@
            open(path);
 
         processCount++;
-        print(processCount+"/"+count+" files.");
+
+        print("\\Update:  processing "+processCount+"/"+count+" files.");
 		//print("Rotate "+Rotate+" times.");
 		for(i = 0; i < Rotate; i++) {
 			run("Rotate 90 Degrees Right");
