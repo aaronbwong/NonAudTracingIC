@@ -6,3 +6,7 @@ This is the readme file accompanying the analysis pipeline for a anatomical trac
 2. ```alignment```: Align each image or series of image to the reference atlas. Apply and store appropriate transformation.
 3. ```cell-count```: Mark cells or objects of interest on images. Either manually or via an algorithm. Input might be images of original or downsampled quality (to be determined).
 4. ```summary```: combining data from previous two steps (```alignment``` and ```cell-count```).
+
+## Dependency
+- AP_histology requires "Curve Fitting Toolbox"
+- AP_histology requires [ColorBrewer/BrewerMap](https://github.com/DrosteEffect/BrewerMap) by DrosteEffect

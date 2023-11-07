@@ -1,0 +1,6 @@
+[submodule "submodules/npy-matlab"]
+	path = submodules/npy-matlab
+	url = https://github.com/kwikteam/npy-matlab
+[submodule "submodules/AP_histology"]
+	path = submodules/AP_histology
+	url = https://github.com/petersaj/AP_histology
