@@ -1,5 +1,9 @@
 function AW_reorderHistology(im_out_path)
-    
+    % rotate90CW and flipHori specify orientations
+    % we keep the following convention: 
+    %   - first rotate rotate90CW times 90 degrees clockwise
+    %   - then flip horizontally if flipHori == 1
+
     slice_order_fn = [im_out_path filesep 'slice_order.csv'];
     if exist(slice_order_fn,"file")
         slice_order = readtable(slice_order_fn);
@@ -19,10 +23,15 @@ function AW_reorderHistology(im_out_path)
     im_rgb = cell(n_im,1);
     prefix = regexp(slice_order.out_fn{1},'(.*)_s[0-9]{2,3}.jpg$','tokens');
     prefix = prefix{1}{1};
-    if(isfield(slice_order,'flipHori'))
+    if(ismember('flipHori',slice_order.Properties.VariableNames))
         flipHori = slice_order.flipHori;
     else
         flipHori = zeros(n_im,1);
+    end
+    if(ismember('rotate90CW',slice_order.Properties.VariableNames))
+        rotate90CW = slice_order.rotate90CW;
+    else
+        rotate90CW = zeros(n_im,1);
     end
     for curr_im = 1:n_im
         im_rgb{curr_im} = imread(out_fn{curr_im});
@@ -52,6 +61,7 @@ function AW_reorderHistology(im_out_path)
     montage_data.im_out_path = im_out_path;
     montage_data.prefix = prefix;
     montage_data.flipHori = flipHori;
+    montage_data.rotate90CW = rotate90CW;
     montage_data.resize_factor = resize_factor;
     montage_data.nrows = nrows;
     montage_data.ncols = ncols;
@@ -112,6 +122,38 @@ end
 
 end
 
+function keypress(montage_fig,eventdata)
+
+montage_data = guidata(montage_fig);
+
+im_out_path = montage_data.im_out_path;
+im_rgb = montage_data.im_rgb;
+im_fn = montage_data.im_fn;
+resize_factor = montage_data.resize_factor;
+prefix = montage_data.prefix;
+flipHori = montage_data.flipHori;
+rotate90CW = montage_data.rotate90CW;
+switch eventdata.Key
+    case 'escape'
+        if ~exist(im_out_path,'dir')
+            mkdir(im_out_path)
+        end
+        
+        % Write all slice images to separate files
+        
+        disp('Saving slice images...');
+        save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,prefix,rotate90CW,flipHori);
+        disp('Done.');
+        close(montage_fig);
+    case {'rightarrow','f','F'}
+        slice_num = montage_data.currSlice;
+        if (slice_num > 0); flip_slice(montage_fig,slice_num); end
+    case {'pagedown','r','R'}
+        slice_num = montage_data.currSlice;
+        if (slice_num > 0); rotate_slice(montage_fig,slice_num); end
+end
+end
+
 function swap_slices(curr_montage,a,b)
 montage_data = guidata(curr_montage);
 
@@ -150,34 +192,6 @@ yrange = panelHeight * floor((a-1)/ncols) + (1:panelHeight);
 end
 
 
-function keypress(montage_fig,eventdata)
-
-montage_data = guidata(montage_fig);
-
-im_out_path = montage_data.im_out_path;
-im_rgb = montage_data.im_rgb;
-im_fn = montage_data.im_fn;
-resize_factor = montage_data.resize_factor;
-prefix = montage_data.prefix;
-flipHori = montage_data.flipHori;
-switch eventdata.Key
-    case 'escape'
-            
-    if ~exist(im_out_path,'dir')
-        mkdir(im_out_path)
-    end
-    
-    % Write all slice images to separate files
-    
-    disp('Saving slice images...');
-    save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,prefix,flipHori);
-    disp('Done.');
-    close(montage_fig);
-    case 'rightarrow'
-    slice_num = montage_data.currSlice;
-    if (slice_num > 0); flip_slice(montage_fig,slice_num); end
-end
-end
 
 function rotate_slice(curr_montage,a)
 montage_data = guidata(curr_montage);
@@ -203,6 +217,14 @@ yRangeB = yMin:(yMin+minDim-1);
 
 imgA = rot90(imgA,nRot);
 montage_data.curr_montage.CData(yRangeB,xRangeB,:) = imgA(1:minDim,1:minDim,:);
+
+% keep record of rotation (with flipping taken into account)
+if (montage_data.flipHori(a))
+    montage_data.rotate90CW(a) = montage_data.rotate90CW(a)-1 ;
+else
+    montage_data.rotate90CW(a) = montage_data.rotate90CW(a)+1 ;
+end
+montage_data.rotate90CW(a) = mod(montage_data.rotate90CW(a),4);
 
 guidata(curr_montage,montage_data);
 
@@ -233,6 +255,7 @@ imgA = montage_data.curr_montage.CData(yRangeA,xRangeA,:);
 imgA = flip(imgA,flipDim);
 montage_data.curr_montage.CData(yRangeA,xRangeA,:) = imgA;
 
+% keep record of flipping (rotation already taken into account)
 montage_data.flipHori(a) = 1-montage_data.flipHori(a);
 
 guidata(curr_montage,montage_data);
