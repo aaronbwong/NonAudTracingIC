@@ -11,8 +11,11 @@ addpath(genpath('src\'));
 
 % -- Data specific ---
 im_path = 'W:\AnalyzedData\Histology\2023-141-09279\FullSize8bitTIFFs\j3';
-slice_path = 'W:\AnalyzedData\Histology\2023-141-09279\downsampledImages\j3';
+im_path = '\\borstlab-nas1\Aaron\EpiFluoData\2021_EpiFluoData\2017-628_AAVRetroICInj\2017-628';
+slice_path = 'W:\AnalyzedData\Histology\2023-141-09279\downsampledImages\j3_old';
+slice_path = 'W:\AnalyzedData\Histology\2017-628_test';
 prefix = '2023-141-09279-j3';
+prefix = '2017-628_test';
 % --------------------
 
 %%
@@ -65,7 +68,7 @@ cd(savepath);
 %% 3) Align CCF to slices
 
 % Find CCF slices corresponding to each histology slice
-% AP_grab_histology_ccf(tv,av,st,slice_path);
+AP_grab_histology_ccf(tv,av,st,slice_path);
 slice_plane_fn = [slice_path,filesep,'DeepSliceResults_normAngle_ordered_spacing_extrapolated.xml'];
 AP_grab_histology_ccf(tv,av,st,slice_path,slice_plane_fn)
 
