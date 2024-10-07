@@ -10,3 +10,10 @@ This is the readme file accompanying the analysis pipeline for a anatomical trac
 ## Dependency
 - AP_histology requires "Curve Fitting Toolbox"
 - AP_histology requires [ColorBrewer/BrewerMap](https://github.com/DrosteEffect/BrewerMap) by DrosteEffect
+- DeepSlice
+
+
+## Installation of DeepSlice
+- Python 3.7 is needed (not later, e.g. 3.11 as of Nov 2023) 
+- This can be done by installing miniconda or anaconda (search for installation file from archive)
+- Then `pip install DeepSlice` should work.
