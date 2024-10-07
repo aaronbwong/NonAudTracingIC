@@ -1,4 +1,8 @@
-function save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,prefix,flipHori)
+function save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,prefix,rotate90CW,flipHori)
+    % im_fn
+    % resize_factor
+    % im_rgb: N x 1 cell array containing images
+
     n_img = length(im_rgb);
     out_fn_dir = cell(n_img,1);
     if (~exist('prefix','var') || isempty(prefix)); prefix = 'Brain'; end
@@ -29,6 +33,9 @@ function save_slice_images(im_fn, resize_factor, im_rgb, im_out_path,prefix,flip
             resize_factor = repmat(resize_factor, n_img,1);
         end
     csvtable = table(order,im_path,ori_filename,resize_factor,out_fn);
+    if (exist('rotate90CW','var') && ~isempty(rotate90CW))
+        csvtable.rotate90CW = rotate90CW;
+    end
     if (exist('flipHori','var') && ~isempty(flipHori))
         csvtable.flipHori = flipHori;
     end

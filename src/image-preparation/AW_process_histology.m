@@ -194,7 +194,9 @@ elseif slice_images
     
     % Write all slice images to separate files
     disp('Saving slice images...');
-    save_slice_images(im_fn, resize_factor, im_rgb, save_dir,prefix);
+    flipHori = zeros(n_im,1);
+    rotate90CW = zeros(n_im,1);
+    save_slice_images(im_fn, resize_factor, im_rgb, save_dir,prefix,rotate90CW,flipHori);
     disp('Done.');
     
     
