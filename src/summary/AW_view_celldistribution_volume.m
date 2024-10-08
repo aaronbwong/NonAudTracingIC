@@ -1,7 +1,15 @@
-function h_scatter = AW_view_celldistribution_volume(tv,ccf_points_cat)
+function h_scatter = AW_view_celldistribution_volume(tv,slice_order)
 % AP_view_celldistribution_volume(tv,ccf_points_cat)
 %
 % Plot histology warped onto CCF volume
+
+ccf_points = slice_order(:,endsWith(slice_order.Properties.VariableNames,'_ccf'));
+nTypes = size(ccf_points,2);
+cellTypeNames = ccf_points.Properties.VariableNames;
+% if nTypes > 1
+%     disp(ColNames)
+%     typeIdx = input('which cell type do you want to plot?');
+% end
 
 
 % Create figure
@@ -28,11 +36,21 @@ h.Enable = 'on';
 
 % Draw all datapoints
 % ccf_points_cat is in native CCF order [AP/DV/ML] 
-h_scatter = scatter3(axes_atlas,ccf_points_cat(:,1),... % AP
-                    ccf_points_cat(:,3),... % ML
-                    ccf_points_cat(:,2),... % DV
-                    5,'red','filled','o');  
+Color = [ 1,0,0;...
+          0,1,0;...
+          0,0.5,1;...
+          1,0,1;];
+MrkrSz = 10;
+for typeIdx = 1:nTypes
+    ccf_points_cat = cell2mat(ccf_points.(cellTypeNames{typeIdx}));
+    h_scatter(typeIdx) = scatter3(axes_atlas,ccf_points_cat(:,1),... % AP
+                        ccf_points_cat(:,3),... % ML
+                        ccf_points_cat(:,2),... % DV
+                        MrkrSz,Color(typeIdx,:),'filled','o');  
+end
 
+    legend(["Brain",cellTypeNames],'Interpreter','none');
+end
 
 
 % % Attempt plotting as 3D surface

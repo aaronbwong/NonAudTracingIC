@@ -90,7 +90,10 @@ AP_view_aligned_histology(st,slice_path);
 % Extract results from ImageJ Cell Counter
 % --- Data specific ---
 cellcountpath = 'gen\cell-count\output\2023-141-09279\';
+slice_path = 'W:\AnalyzedData\Histology\2023-141-09279\downsampledImages\j3_old';
 cellcountpath = 'W:\AnalyzedData\Histology\2023-141-09279\CellCounterResults';
+slice_path = 'Z:\Falk Bronnle\DATA\Brain 02888-22007\TIFFS 10x\Slices';
+cellcountpath = 'Z:\Falk Bronnle\DATA\Brain 02888-22007\TIFFS 10x\Cellcount';
 % ---------------------
 [histology_points,slice_order] = AW_cellcounter2histology(slice_path,cellcountpath,resize_factor);
 
@@ -98,7 +101,7 @@ cellcountpath = 'W:\AnalyzedData\Histology\2023-141-09279\CellCounterResults';
 ccf_points = AP_histology2ccf(histology_points,slice_path);
 
 % Display points in 3D with brain mesh outline
-h_scatter = AW_view_celldistribution_volume(tv,cell2mat(ccf_points));
+h_scatter = AW_view_celldistribution_volume(tv,slice_order);
 
 
 % Concatenate points and round to nearest integer coordinate
