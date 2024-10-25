@@ -9,7 +9,7 @@ function [ccf_points,slice_order] = AW_cellcounter2histology(slice_path,cellcoun
 
 % load slice_order data
 slice_order_fn = [slice_path filesep 'slice_order.csv'];
-slice_order = readtable(slice_order_fn);
+slice_order = readtable(slice_order_fn,"FileType","text","ReadVariableNames",true,"NumHeaderLines",0);
 
 % load cell counter data
 cellcount_path_dir = dir([cellcountpath filesep '*.xml*']);
