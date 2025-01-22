@@ -1,16 +1,10 @@
-function h_scatter = AW_view_celldistribution_volume(tv,slice_order)
+function gui_fig = AW_view_celldistribution_volume(tv,cell_csv)
 % AP_view_celldistribution_volume(tv,ccf_points_cat)
 %
 % Plot histology warped onto CCF volume
 
-ccf_points = slice_order(:,endsWith(slice_order.Properties.VariableNames,'_ccf'));
-nTypes = size(ccf_points,2);
-cellTypeNames = ccf_points.Properties.VariableNames;
-% if nTypes > 1
-%     disp(ColNames)
-%     typeIdx = input('which cell type do you want to plot?');
-% end
-
+% cell_csv: path to CSV file containing CCF coordinates of cells
+%  should store as columns ccf_ap, ccf_dv, ccf_ml
 
 % Create figure
 gui_fig = figure;
@@ -21,13 +15,14 @@ axes_atlas = axes;
 % X-Y-Z axes in the order [AP/ML/DV] (processed CCF)
 set(axes_atlas,'ZDir','reverse');
 hold(axes_atlas,'on');
-axis vis3d equal off manual
+axis vis3d equal on manual
 view([-30,25]);
 caxis([0 300]);
 [ap_max,dv_max,ml_max] = size(tv);
 xlim([-10,ap_max+10])
 ylim([-10,ml_max+10])
 zlim([-10,dv_max+10])
+axes_atlas.Color = 'none';
 
 
 % Turn on rotation by default
@@ -36,20 +31,18 @@ h.Enable = 'on';
 
 % Draw all datapoints
 % ccf_points_cat is in native CCF order [AP/DV/ML] 
-Color = [ 1,0,0;...
+Colors = [ 1,0,0;...
           0,1,0;...
           0,0.5,1;...
           1,0,1;];
-MrkrSz = 10;
-for typeIdx = 1:nTypes
-    ccf_points_cat = cell2mat(ccf_points.(cellTypeNames{typeIdx}));
-    h_scatter(typeIdx) = scatter3(axes_atlas,ccf_points_cat(:,1),... % AP
-                        ccf_points_cat(:,3),... % ML
-                        ccf_points_cat(:,2),... % DV
-                        MrkrSz,Color(typeIdx,:),'filled','o');  
-end
 
-    legend(["Brain",cellTypeNames],'Interpreter','none');
+gui_data.axes_atlas = axes_atlas;
+gui_data.cells = {};
+guidata(gui_fig,gui_data);
+
+AW_add_celldistribution_volume(gui_fig,cell_csv,Colors(1,:));
+
+legend(["Brain","data1"],'Interpreter','none');
 end
 
 
