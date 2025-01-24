@@ -31,6 +31,9 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
+    print(f"Processing {mp.getSlices().size()} slices...")
+    print(f"-----------------------------------")
+
     # Loop through data files
     for idx in range(0, mp.getSlices().size()):
         # Get image name
@@ -43,12 +46,14 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
             # Create an input dialog for the user to confirm or adjust the mouse_name
             mouse_name = askstring("Mouse Name", "Confirm or adjust the mouse name:", initialvalue=mouse_name)
 
+        print(f"Image file: {image_name}")
         # Get transformation
         transform_pix_to_atlas = mp.getSlices().get(idx).getSlicePixToCCFRealTransform()
 
         # Read in data
         xml_name = 'CellCounter_' + image_name[:-4] + '.xml'
         file_path = os.path.join(cell_count_path, xml_name)
+        print(f"reading cell counter xml: {xml_name}")
         tree = ET.parse(file_path)
         root = tree.getroot()
         marker_data = root.find('Marker_Data')
@@ -57,7 +62,7 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
         for marker_type in marker_data.findall('Marker_Type'):
             marker_name = marker_type.find('Name').text
             markers = marker_type.findall('Marker')
-            print(f"Name: {marker_name}, Number of markers: {len(markers)}")
+            print(f"Marker name: {marker_name}, Number of markers: {len(markers)}")
 
             # Initialize the DataFrame if it doesn't exist
             if marker_name not in dataframes:
@@ -68,16 +73,16 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
             for marker in markers:
                 x = int(marker.find('MarkerX').text)
                 y = int(marker.find('MarkerY').text)
-                print(coordInImage)
-                print(coordInCCF)
+                # print(coordInImage)
+                # print(coordInCCF)
                 coordInImage[0] = x
                 coordInImage[1] = y
                 coordInImage[2] = 0
                 #coordInCCF = [0, 0, 0]  # Initialize coordInCCF
-                print(x)
-                print(y)
-                print(coordInImage)
-                print(coordInCCF)
+                # print(x)
+                # print(y)
+                # print(coordInImage)
+                # print(coordInCCF)
                 transform_pix_to_atlas.inverse().apply(coordInImage, coordInCCF)
                 data.append({
                     "mouse": mouse_name,
@@ -91,6 +96,7 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
 
             # Append data to the appropriate DataFrame
             dataframes[marker_name] = pd.concat([dataframes[marker_name], pd.DataFrame(data)], ignore_index=True)
+        print(f"-----------------------------------")
 
     # Save each DataFrame to a CSV file
     for marker_name, df in dataframes.items():
@@ -98,6 +104,8 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
 
     print("DataFrames saved to CSV files")
 
+
+print("Asking for user input...")
 
 # Initialize Tkinter root
 root = Tk()
@@ -143,3 +151,8 @@ mp = abba.mp
 
 print("Processing data...")
 process_data(cell_count_path, mp, output_path, atlas_pixel_size=10)
+
+print("Closing abba session...")
+abba.close()
+
+print(f"Script {__file__} has completed.")
