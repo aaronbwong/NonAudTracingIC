@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 from tkinter import Tk, filedialog
 from tkinter.simpledialog import askstring
+import re
 
 import xml.etree.ElementTree as ET
 from jpype.types import JString, JArray, JDouble
@@ -16,6 +17,19 @@ print("Importing ABBA...")
 from abba_python.abba import Abba
 print("Libraries loaded.")
 
+def find_cell_counter_file(cell_count_path, base_name, scene_number):
+    # List all files in the directory
+    files = os.listdir(cell_count_path)
+    
+    # Filter files that start with the given prefix
+    prefix = 'CellCounter_' + base_name+'('+str(scene_number)+')'
+    matching_files = [f for f in files if f.startswith(prefix) and f.endswith('.xml')]
+    
+    if len(matching_files) == 1:
+        return matching_files[0]
+    else:
+        print(f"Error: Found {len(matching_files)} matching files for {prefix}*")
+        return None
 
 def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
     # Initialize an empty dictionary to store DataFrames
@@ -34,10 +48,21 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
     print(f"Processing {mp.getSlices().size()} slices...")
     print(f"-----------------------------------")
 
+    # check file name/format
+    pattern = r'(.*)\.czi - Scene #'
+    image_name = str(mp.getSlices().get(0).getName())
+    match = re.search(pattern, image_name)
+    if match:
+        filetype = 'czi'
+        base_name = match.group(1)
+    else:
+        filetype = 'tif'
+        
+
     # Loop through data files
     for idx in range(0, mp.getSlices().size()):
         # Get image name
-        image_name = mp.getSlices().get(idx).getName()
+        image_name = str(mp.getSlices().get(idx).getName())
 
         # Get mouse name
         if idx == 0:
@@ -51,11 +76,20 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
         transform_pix_to_atlas = mp.getSlices().get(idx).getSlicePixToCCFRealTransform()
 
         # Read in data
-        xml_name = 'CellCounter_' + image_name[:-4] + '.xml'
+        if filetype == 'czi':
+            pattern = r'Scene #(\d+)'
+            match = re.search(pattern, image_name)
+            if match:
+                scene_number = int(match.group(1))
+                xml_name = find_cell_counter_file(cell_count_path, base_name, scene_number)
+        else:
+            xml_name = 'CellCounter_' + image_name[:-4] + '.xml'
+            
         file_path = os.path.join(cell_count_path, xml_name)
         print(f"reading cell counter xml: {xml_name}")
         tree = ET.parse(file_path)
         root = tree.getroot()
+        image_Filename = root.find('Image_Properties').find('Image_Filename').text
         marker_data = root.find('Marker_Data')
 
         # Loop through data
@@ -66,7 +100,7 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
 
             # Initialize the DataFrame if it doesn't exist
             if marker_name not in dataframes:
-                dataframes[marker_name] = pd.DataFrame(columns=["mouse", "image_name", "image_x", "image_y", "ccf_ap", "ccf_dv", "ccf_ml"])
+                dataframes[marker_name] = pd.DataFrame(columns=["mouse", "image_name", "image_Filename", "xml_name", "image_x", "image_y", "ccf_ap", "ccf_dv", "ccf_ml"])
 
             # Collect data
             data = []
@@ -87,6 +121,8 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
                 data.append({
                     "mouse": mouse_name,
                     "image_name": image_name,
+                    "image_Filename": image_Filename,
+                    "xml_name": xml_name,
                     "image_x": x,
                     "image_y": y,
                     "ccf_ap": int(coordInCCF[0] * 1000 / atlas_pixel_size),
