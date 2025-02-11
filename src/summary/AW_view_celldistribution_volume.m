@@ -23,9 +23,9 @@ hold(axes_atlas,'on');
 axis vis3d equal on manual
 view([-30,25]);
 caxis([0 300]);
-xlim([-10,ap_max+10])
-ylim([-10,ml_max+10])
-zlim([-10,dv_max+10])
+xlim([-10,ap_max+10]);xlabel('Anterior-Posterior (10 um)')
+ylim([-10,ml_max+10]);ylabel('Right-Left (10 um)')
+zlim([-10,dv_max+10]);zlabel('Dorsal-Ventral (10 um)')
 axes_atlas.Color = 'none';
 
 
@@ -45,7 +45,7 @@ gui_data.cells = {};
 guidata(gui_fig,gui_data);
 
 if ~iscell(csvFilePaths); csvFilePaths = {csvFilePaths};end
-ColorList = jet(length(csvFilePaths));
+ColorList = jet(length(csvFilePaths)+1);
 if ~exist("DisplayNameList","var");DisplayNameList = num2cell(1:length(csvFilePaths));end
 for iCsv = 1:length(csvFilePaths)
     % Add cell distribution volume to the image
