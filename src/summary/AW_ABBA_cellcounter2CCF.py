@@ -1,4 +1,3 @@
-
 print("Importing generic libraries...")
 import os
 import time
@@ -17,6 +16,12 @@ print("Importing ABBA...")
 from abba_python.abba import Abba
 print("Libraries loaded.")
 
+from PIL import Image
+import warnings
+
+# Suppress DecompressionBombWarning
+warnings.simplefilter('ignore', Image.DecompressionBombWarning)
+
 def find_cell_counter_file(cell_count_path, base_name, scene_number):
     # List all files in the directory
     files = os.listdir(cell_count_path)
@@ -31,7 +36,12 @@ def find_cell_counter_file(cell_count_path, base_name, scene_number):
         print(f"Error: Found {len(matching_files)} matching files for {prefix}*")
         return None
 
-def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
+def get_image_size(image_path, image_filename):
+    file_path = os.path.join(image_path, image_filename + '.tif')
+    with Image.open(file_path) as img:
+        return img.width, img.height
+
+def process_data(cell_count_path, mp, rotation_data, output_path, atlas_pixel_size=10):
     # Initialize an empty dictionary to store DataFrames
     dataframes = {}
 
@@ -92,6 +102,13 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
         image_Filename = root.find('Image_Properties').find('Image_Filename').text
         marker_data = root.find('Marker_Data')
 
+        # Check rotation and flipping
+        image_base_name = os.path.splitext(image_Filename)[0]
+        rotation_row = rotation_data[rotation_data['TIFF'] == image_base_name]
+        rotated = rotation_row['Rotated'].iloc[0] == 'yes'
+        flipped = rotation_row['Flipped'].iloc[0] == 'yes'
+        print(f"Image {image_Filename} - Rotated: {rotated}, Flipped: {flipped}")
+
         # Loop through data
         for marker_type in marker_data.findall('Marker_Type'):
             marker_name = marker_type.find('Name').text
@@ -107,16 +124,15 @@ def process_data(cell_count_path, mp, output_path, atlas_pixel_size=10):
             for marker in markers:
                 x = int(marker.find('MarkerX').text)
                 y = int(marker.find('MarkerY').text)
-                # print(coordInImage)
-                # print(coordInCCF)
+                if filetype == 'czi':
+                    # Apply rotation and flipping if necessary
+                    if flipped:
+                        x =  rotation_row['Width'].iloc[0] - x + 1 # Flip x coordinate
+                    if rotated:
+                        x, y = y, rotation_row['Width'].iloc[0] - x + 1  # Rotate 90 degrees left based on image size (1-based)
                 coordInImage[0] = x
                 coordInImage[1] = y
                 coordInImage[2] = 0
-                #coordInCCF = [0, 0, 0]  # Initialize coordInCCF
-                # print(x)
-                # print(y)
-                # print(coordInImage)
-                # print(coordInCCF)
                 transform_pix_to_atlas.inverse().apply(coordInImage, coordInCCF)
                 data.append({
                     "mouse": mouse_name,
@@ -153,8 +169,20 @@ abba_file = filedialog.askopenfilename(
     filetypes=(("ABBA state files", "*.abba"), ("All files", "*.*"))
 )
 
+# Ask for the image rotation CSV file
+rotation_file = filedialog.askopenfilename(
+    title="Select rotation CSV file",
+    filetypes=(("CSV files", "*.csv"), ("All files", "*.*"))
+)
+
 # Get the directory one level above the abba_file
 project_dir = os.path.dirname(os.path.dirname(abba_file))
+
+# Ask for the image path
+image_path = filedialog.askdirectory(
+    title="Select directory for image path",
+    initialdir=project_dir
+)
 
 # Ask for the directory for cell_count_path
 cell_count_path = filedialog.askdirectory(
@@ -169,8 +197,33 @@ output_path = filedialog.askdirectory(
 )
 
 print(f"ABBA file: {abba_file}")
+print(f"Rotation file: {rotation_file}")
+print(f"Image path: {image_path}")
 print(f"Cell count path: {cell_count_path}")
 print(f"Output path: {output_path}")
+
+# Read the CSV file and remove any trailing spaces from column names
+rotation_data = pd.read_csv(rotation_file)
+rotation_data.columns = rotation_data.columns.str.strip() # Remove any trailing spaces
+print(f"Rotation data loaded: {rotation_data.shape[0]} rows")
+
+# Initialize columns for width and height
+rotation_data['Width'] = 0
+rotation_data['Height'] = 0
+
+for idx in range(rotation_data.shape[0]):
+    image_Filename = rotation_data.iloc[idx]['TIFF']
+
+    # Get image size
+    width, height = get_image_size(image_path, image_Filename)
+    rotation_data.at[idx, 'Width'] = width
+    rotation_data.at[idx, 'Height'] = height
+    # print(f"Image {image_Filename} - Width: {width}, Height: {height}")
+
+# Save the updated rotation data to a new CSV file
+updated_rotation_file = os.path.join(os.path.dirname(rotation_file), 'Updated_' + os.path.basename(rotation_file))
+rotation_data.to_csv(updated_rotation_file, index=False)
+print(f"Updated rotation data saved to {updated_rotation_file}")
 
 # Initialize ABBA
 print("Initializing ABBA...")
@@ -186,7 +239,7 @@ print("Getting the Mouse Project data...")
 mp = abba.mp
 
 print("Processing data...")
-process_data(cell_count_path, mp, output_path, atlas_pixel_size=10)
+process_data(cell_count_path, mp, rotation_data, output_path, atlas_pixel_size=10)
 
 print("Closing abba session...")
 abba.close()
