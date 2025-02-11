@@ -1,4 +1,4 @@
-function h_scatter = AW_add_celldistribution_volume(gui_fig,cell_csv,Color)
+function h_scatter = AW_add_celldistribution_volume(gui_fig,cell_csv,Color,DisplayName)
 % AW_add_celldistribution_volume(axes_atlas,cell_csv,Color)
 %
 % Plot histology warped onto CCF volume
@@ -7,6 +7,7 @@ function h_scatter = AW_add_celldistribution_volume(gui_fig,cell_csv,Color)
 %  should store as columns ccf_ap, ccf_dv, ccf_ml
 
 if nargin < 3; Color = 'r'; end
+if nargin < 4; DisplayName = 'Data'; end
 
 % get gui_data
 gui_data = guidata(gui_fig);
@@ -25,7 +26,8 @@ h_scatter = scatter3(gui_data.axes_atlas,...
                     cells.ccf_ap,... % AP
                     cells.ccf_ml,... % ML
                     cells.ccf_dv,... % DV
-                    MrkrSz,Color,'filled','o');  
+                    MrkrSz,Color,'filled','o', ...
+                    'DisplayName',DisplayName);  
 hold off;
 
 % update gui_data

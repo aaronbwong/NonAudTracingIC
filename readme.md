@@ -11,6 +11,7 @@ This is the readme file accompanying the analysis pipeline for a anatomical trac
 - AP_histology requires "Curve Fitting Toolbox"
 - AP_histology requires [ColorBrewer/BrewerMap](https://github.com/DrosteEffect/BrewerMap) by DrosteEffect
 - DeepSlice
+- [ABBA-python](https://github.com/BIOP/abba_python) release v0.10.2 or later (for combining ABBA slice alignment with ImageJ Cell Counter results)
 
 
 ## Installation of DeepSlice

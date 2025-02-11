@@ -1,4 +1,4 @@
-function gui_fig = AW_view_celldistribution_volume(tv,cell_csv)
+function gui_fig = AW_view_celldistribution_volume(csvFilePaths,DisplayNameList)
 % AP_view_celldistribution_volume(tv,ccf_points_cat)
 %
 % Plot histology warped onto CCF volume
@@ -6,19 +6,23 @@ function gui_fig = AW_view_celldistribution_volume(tv,cell_csv)
 % cell_csv: path to CSV file containing CCF coordinates of cells
 %  should store as columns ccf_ap, ccf_dv, ccf_ml
 
+ap_max = 1320;
+dv_max = 800;
+ml_max = 1140;
+
 % Create figure
 gui_fig = figure;
 
 % Set up 3D plot for volume viewing
 axes_atlas = axes;
 [~, brain_outline] = plotBrainGrid([],axes_atlas);
+brain_outline.DisplayName = 'Brain';
 % X-Y-Z axes in the order [AP/ML/DV] (processed CCF)
 set(axes_atlas,'ZDir','reverse');
 hold(axes_atlas,'on');
 axis vis3d equal on manual
 view([-30,25]);
 caxis([0 300]);
-[ap_max,dv_max,ml_max] = size(tv);
 xlim([-10,ap_max+10])
 ylim([-10,ml_max+10])
 zlim([-10,dv_max+10])
@@ -40,9 +44,15 @@ gui_data.axes_atlas = axes_atlas;
 gui_data.cells = {};
 guidata(gui_fig,gui_data);
 
-AW_add_celldistribution_volume(gui_fig,cell_csv,Colors(1,:));
+if ~iscell(csvFilePaths); csvFilePaths = {csvFilePaths};end
+ColorList = jet(length(csvFilePaths));
+if ~exist("DisplayNameList","var");DisplayNameList = num2cell(1:length(csvFilePaths));end
+for iCsv = 1:length(csvFilePaths)
+    % Add cell distribution volume to the image
+    gui_fig = AW_add_celldistribution_volume(gui_fig,csvFilePaths{iCsv},ColorList(iCsv,:),DisplayNameList{iCsv});
+end
 
-legend(["Brain","data1"],'Interpreter','none');
+legend;
 end
 
 
