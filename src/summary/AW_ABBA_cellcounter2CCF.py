@@ -228,12 +228,17 @@ print(f"Updated rotation data saved to {updated_rotation_file}")
 # Initialize ABBA
 print("Initializing ABBA...")
 print("You may have to click a window!")
-abba = Abba('Adult Mouse Brain - Allen Brain Atlas V3p1') # You may have to click a window!
+abba = Abba('Adult Mouse Brain - Allen Brain Atlas V3p1',
+            x_axis='LR') # You may have to click a window!
+
+print(f"X_axis: {abba.x_axis}\nY_axis: {abba.y_axis}\nZ_axis: {abba.z_axis}\n")
 
 # Load the ABBA file
 print("Loading ABBA file...")
 abba.state_load(abba_file) # full absolute path needed
 print("ABBA file loaded.")
+
+print(f"X_axis: {abba.x_axis}\nY_axis: {abba.y_axis}\nZ_axis: {abba.z_axis}\n")
 
 print("Getting the Mouse Project data...")
 mp = abba.mp
