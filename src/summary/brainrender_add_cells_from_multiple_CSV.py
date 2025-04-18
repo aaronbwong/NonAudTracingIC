@@ -28,10 +28,16 @@ scene = Scene(title="Labelled points")
 ic = scene.add_brain_region("IC", alpha=0.15)
 # Add region to scene
 mb = scene.add_brain_region("MB", alpha=0.10, color="blue")
+ll = scene.add_brain_region("ll", alpha=0.15)
+nll = scene.add_brain_region("nll", alpha=0.15)
+bic = scene.add_brain_region("bic", alpha=0.15)
 
-# print(type(probe_track))
+# Calculate the mean of each item in the list probe_track
+probe_track_means = [np.mean(points, axis=0) for points in probe_track]
+print(probe_track_means)
+print(type(probe_track_means))
 # Fit a regression line to the cells' x, y, z coordinates using the eigenvector method
-cells_array = np.array(np.vstack(probe_track))  # Convert cells to a NumPy array
+cells_array = np.array(np.vstack(probe_track_means))  # Convert means to a NumPy array
 
 # Compute the mean of the points
 mean_point = np.mean(cells_array, axis=0)
@@ -65,6 +71,7 @@ for i, points in enumerate(probe_track):
 for i, points in enumerate(IC_outline):
     scene.add(Points(points, name="IC outline", colors=colors[i],radius=30,alpha=0.3))
 # scene.add(Points(ic_cells, name="IC CELLS", colors="steelblue",radius=30,alpha=0.7))
+scene.add(Points(cells_array, name="Probe track Points", colors="black",radius=50,alpha=0.7))
 
 # render
 # scene.content
