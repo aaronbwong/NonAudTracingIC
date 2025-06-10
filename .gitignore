@@ -3,3 +3,4 @@ data/*
 gen/*
 *.csv
 *.asv
+*__pycache__
