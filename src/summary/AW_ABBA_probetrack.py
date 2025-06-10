@@ -18,6 +18,7 @@ print("Libraries loaded.")
 
 from PIL import Image
 import warnings
+import numpy as np
 
 # def process_single_slice(mp,idx,xml_path):
 
@@ -117,7 +118,48 @@ project_dir = os.path.dirname(os.path.dirname(abba_file))
 output_folder = Path(os.path.join(project_dir,"output"))
 output_folder.mkdir(exist_ok=True)
 
+scene_number_array = np.full(mp.getSlices().size(), np.nan)
 for idx in range(0, mp.getSlices().size()):
+    # Get image name
+    image_name = str(mp.getSlices().get(idx).getName())
+    filetype = 'czi'
+    # Read in data
+    if filetype == 'czi':
+        pattern = r'Scene #(\d+)'
+        match = re.search(pattern, image_name)
+        if match:
+            scene_number = int(match.group(1))              
+            scene_number_array[idx] = scene_number
+
+print("Scene numbers for slices:")
+print(scene_number_array)
+print(f"Number of scenes: {len(scene_number_array)}")
+
+# Prompt user for start and end slice numbers
+root = Tk()
+root.withdraw()
+start_scene = askstring("Slice Range", f"Enter start scene number (1 to {mp.getSlices().size()}):")
+end_scene = askstring("Slice Range", f"Enter end scene number (1 to {mp.getSlices().size()}):")
+root.destroy()
+
+try:
+    start_slice = int(np.where(scene_number_array == int(start_scene))[0][0])
+    end_slice = int(np.where(scene_number_array == int(end_scene))[0][0])
+except (TypeError, ValueError):
+    print("Invalid input for slice range. Exiting...")
+    exit()
+
+if start_slice > end_slice:
+    (start_slice, end_slice) = (end_slice, start_slice)
+
+if start_slice < 0 or end_slice >= mp.getSlices().size():
+    print("Invalid slice range. Exiting...")
+    exit()
+
+for idx in range(start_slice, end_slice+1):
+    # # Find the index in scene_number_array where scene_number_array[idx] == scene_number
+    # idx = int(np.where(scene_number_array == scene_number)[0][0])
+    
     # Get the image name for the current slice
     image_name = mp.getSlices().get(idx).getName()
     print(f"Processing slice {idx}: {image_name}")
@@ -135,6 +177,7 @@ for idx in range(0, mp.getSlices().size()):
     if not xml_file_path:
         print(f"No file selected for slice {idx}. Skipping...")
         continue
+    xml_filename = os.path.basename(xml_file_path)
 
     # Load marker data from the XML file
     marker_data, image_Filename = load_marker_xml(xml_file_path)
@@ -151,6 +194,9 @@ for idx in range(0, mp.getSlices().size()):
     transformed_df = pd.DataFrame([
         {
             "marker_name": marker_name,
+            "image_name": image_name,
+            "image_Filename": image_Filename,
+            "xml_name": xml_filename,
             **marker
         }
         for marker_name, markers in transformed_data.items()
@@ -159,7 +205,9 @@ for idx in range(0, mp.getSlices().size()):
     print(transformed_df)
 
     # Save the resulting DataFrame to the output folder
-    output_file = output_folder / f"CoordCCF_{image_Filename}.csv"
+    if xml_filename.startswith("CellCounter_"):
+        base_filename = xml_filename[len("CellCounter_"):-4]
+    output_file = output_folder / f"CoordCCF_{base_filename}.csv"
     transformed_df.to_csv(output_file, index=False)
     print(f"Transformed data saved to {output_file}")
 print("All slices processed.")
