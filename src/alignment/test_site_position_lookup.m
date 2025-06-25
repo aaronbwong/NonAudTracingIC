@@ -37,3 +37,29 @@ probe_vector = probe_vector./ norm(probe_vector);
     electrode_ccf_table.xcoords = xcoords;
     electrode_ccf_table.kcoords = kcoords;
     % TODO: apply xcoords
+%% read in cluster info\
+load(cluster_info_file,'clusterinfo');
+
+%% find cluster location
+good_clusters = [522,376,408,470,476];
+cluster_channel_0ind = [];%[2,0,8,44,23];
+for ii = 1:length(cluster_channel)
+    cluster_channel_0ind(ii) = clusterinfo.channel(clusterinfo.id==good_clusters(ii));
+    idx = electrode_ccf_table.chan_id == cluster_channel(ii);
+    cluster_ccf_ap(ii) = electrode_ccf_table.ccf_ap(idx);
+    cluster_ccf_dv(ii) = electrode_ccf_table.ccf_dv(idx);
+    cluster_ccf_ml(ii) = electrode_ccf_table.ccf_ml(idx);
+end
+cluster_channel = cluster_channel_0ind +1;
+
+good_cluster_table = table(good_clusters(:),cluster_channel(:),cluster_ccf_ap(:),cluster_ccf_dv(:),cluster_ccf_ml(:), ...
+                'VariableNames',{'cluster_nr','channel','ccf_ap','ccf_dv','ccf_ml'});
+%% display cluster location
+scatter3(good_cluster_table,"ccf_ap","ccf_ml","ccf_dv")
+hold on;
+for ii = 1:size(good_cluster_table,1)
+    text(cluster_ccf_ap(ii),cluster_ccf_ml(ii),cluster_ccf_dv(ii),num2str(good_clusters(ii)))
+end
+hold off
+ax = gca;
+ax.ZDir = 'reverse';
