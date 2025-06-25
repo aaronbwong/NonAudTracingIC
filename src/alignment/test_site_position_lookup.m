@@ -41,16 +41,18 @@ probe_vector = probe_vector./ norm(probe_vector);
 load(cluster_info_file,'clusterinfo');
 
 %% find cluster location
-good_clusters = [522,376,408,470,476];
-cluster_channel_0ind = [];%[2,0,8,44,23];
-for ii = 1:length(cluster_channel)
+good_clusters = [522,376,408,470,476]';
+num_clusters = length(good_clusters);
+cluster_channel_0ind = nan(num_clusters,1);%[2,0,8,44,23];
+cluster_channel = nan(num_clusters,1);
+for ii = 1:length(good_clusters)
     cluster_channel_0ind(ii) = clusterinfo.channel(clusterinfo.id==good_clusters(ii));
+    cluster_channel(ii) = cluster_channel_0ind(ii) +1;
     idx = electrode_ccf_table.chan_id == cluster_channel(ii);
     cluster_ccf_ap(ii) = electrode_ccf_table.ccf_ap(idx);
     cluster_ccf_dv(ii) = electrode_ccf_table.ccf_dv(idx);
     cluster_ccf_ml(ii) = electrode_ccf_table.ccf_ml(idx);
 end
-cluster_channel = cluster_channel_0ind +1;
 
 good_cluster_table = table(good_clusters(:),cluster_channel(:),cluster_ccf_ap(:),cluster_ccf_dv(:),cluster_ccf_ml(:), ...
                 'VariableNames',{'cluster_nr','channel','ccf_ap','ccf_dv','ccf_ml'});
