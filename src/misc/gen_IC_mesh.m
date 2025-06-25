@@ -24,6 +24,13 @@ IC_mesh_3d_smth.vertices = IC_mesh_3d_smth.vertices * ccf_scale_um;
     % IPR -> PRI as XYZ (matlab display)
 IC_mesh_3d.vertices = IC_mesh_3d.vertices(:,[2,3,1]);
 IC_mesh_3d_smth.vertices = IC_mesh_3d_smth.vertices(:,[2,3,1]);
+IC_mesh_3d.orientation = 'PRI';
+IC_mesh_3d.dimensions = {'ccf_ap','ccf_ml','ccf_dv'};
+IC_mesh_3d.unit = 'micron';
+
+IC_mesh_3d_smth.orientation = 'PRI';
+IC_mesh_3d_smth.dimensions = {'ccf_ap','ccf_ml','ccf_dv'};
+IC_mesh_3d_smth.unit = 'micron';
 
 %% save mesh
 save(fullfile("gen","IC_mesh_3d.mat"),"IC_mesh_3d","IC_mesh_3d_smth");
