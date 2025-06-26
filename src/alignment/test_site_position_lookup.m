@@ -12,13 +12,20 @@ good_clusters_all = {
     };
 
 good_cluster_table = table();
+ccf_table = table();
+
 
 for i = 1:length(mice)
     good_clusters = good_clusters_all{i};
     if isempty(good_clusters); continue; end
 
-    tcluster_position = site_position_lookup(mice(i), good_clusters);
+    [tcluster_position, tccf_table] = site_position_lookup(mice(i), good_clusters);
+
+    % add info and combine tables
+    tccf_table = [table([mice(i); mice(i)], 'VariableNames', {'mouse_nr'}), tccf_table];
+    ccf_table = [ccf_table; tccf_table];
     good_cluster_table = [good_cluster_table; tcluster_position];
+
 end
 
 %% PLOTTING
@@ -36,6 +43,8 @@ for i = 1:length(mice)
              good_cluster_table.ccf_dv(idx), ...
              50, colors(i,:), 'filled');
 
+    % TO DO: fit line in probe track
+
     % Add cluster number labels
     for j = find(idx)'
         text(good_cluster_table.ccf_ap(j), ...
@@ -52,6 +61,8 @@ ax = gca;
 ax.ZDir = 'reverse';
 axis(ax, 'equal')
 legend(ax, cellstr(string(mice)));
+
+%% plot line
 
 %% Add IC mask
 

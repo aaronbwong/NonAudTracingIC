@@ -1,4 +1,4 @@
-function [cluster_position] = site_position_lookup(mouse, clusters)
+function [cluster_position, ccf_table] = site_position_lookup(mouse, clusters)
 %% load channel map
 
 if mouse == 27 % M27
