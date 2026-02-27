@@ -1,37 +1,47 @@
 
-[filename, filepath] = uigetfile('*.csv', 'Select CSV file to load');
-Slice = readtable(fullfile(filepath, filename));
-
+% [filename, filepath] = uigetfile('*.csv', 'Select CSV file to load');
+% Slice = readtable(fullfile(filepath, filename));
+%%
 
 [normal,plane_eq] = findPlaneNormal(Slice);
 [horizontal_angle,vertical_angle] = calculateAngles(normal);
-Y_target = 5700; 
-Z_target = 4000; 
-[X_plane,Y_target,Z_target] = calculateXPlane(plane_eq,Y_target,Z_target);
+ML_target = 5700; 
+DV_target = 4000; 
+[AP_plane,ML_target,DV_target] = calculateXPlane(plane_eq,ML_target,DV_target);
 
 fprintf('Vertical angle: %.2f degrees\n', vertical_angle);
 fprintf('Horizontal angle: %.2f degrees\n', horizontal_angle);
 
-% Extract coordinates
+%% Extract coordinates
 pts = [Slice.ccf_ap, Slice.ccf_ml, Slice.ccf_dv];
+
+% Color map for image location
+max_image_x = max(Slice.image_x);
+max_image_y = max(Slice.image_y);
+
+markerColor = 0.25 + 0.75 .* ...
+            [ [1].*Slice.image_x ./ max_image_x, ... % R
+              zeros(height(Slice),1),... %G
+              [1].*Slice.image_y ./ max_image_y]; % B
+
 
 % Create 3D scatter plot
 figure;
-scatter3(pts(:,1), pts(:,2), pts(:,3), 'filled');
+scatter3(pts(:,1), pts(:,2), pts(:,3), 10, markerColor, 'filled');
 hold on;
-Y_target = 5700;
-Z_target = 4000;
+ML_target = 5700;
+DV_target = 4000;
 % Plot normal vector as arrow from origin
-fprintf('Point on plane at Y=%.0f, Z=%.0f: X=%.2f\n', Y_target, Z_target, X_plane);
-scatter3(X_plane, Y_target, Z_target, 100, 'r', 'filled');
+fprintf('Point on plane at Y=%.0f, Z=%.0f: X=%.2f\n', ML_target, DV_target, AP_plane);
+scatter3(AP_plane, ML_target, DV_target, 100, 'r', 'filled');
 arrow_length = 2500; % Length of the normal vector arrow
 
 
-quiver3(X_plane, Y_target, Z_target, ...
+quiver3(AP_plane, ML_target, DV_target, ...
         arrow_length*normal(1), ...
         arrow_length*normal(2), ...
         arrow_length*normal(3), 'r', 'LineWidth', 1);
-plot3([0,13200],[Y_target,Y_target],[Z_target,Z_target],'-','LineWidth',1)
+plot3([0,13200],[ML_target,ML_target],[DV_target,DV_target],'-','LineWidth',1)
 % % Plot the plane
 % [X, Y] = meshgrid(linspace(min(pts(:,1)), max(pts(:,1)), 10), ...
 %                    linspace(min(pts(:,2)), max(pts(:,2)), 10));
@@ -91,12 +101,12 @@ horizontal_angle = -atan2(normal(2), normal(1)) * 180/pi; % in agreement with AB
 vertical_angle = asin(normal(3)) * 180/pi;
 end
 
-function [X_plane,Y_target,Z_target] = calculateXPlane(plane_eq,Y_target,Z_target)
+function [AP_plane,ML_target,DV_target] = calculateXPlane(plane_eq,ML_target,DV_target)
 
-% Find point on plane where Y = 5500 and Z = 4200
-if nargin < 2; Y_target = 5700; end
-if nargin < 2; Z_target = 4000; end
+% Find point on plane where Y = 5700 and Z = 4200
+if nargin < 2; ML_target = 5700; end
+if nargin < 2; DV_target = 4000; end
 % From plane equation: ax + by + cz + d = 0, solve for X
-X_plane = (-plane_eq(2)*Y_target - plane_eq(3)*Z_target - plane_eq(4)) / plane_eq(1);
+AP_plane = (-plane_eq(2)*ML_target - plane_eq(3)*DV_target - plane_eq(4)) / plane_eq(1);
 
 end
