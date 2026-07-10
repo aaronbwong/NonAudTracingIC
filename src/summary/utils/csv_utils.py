@@ -16,6 +16,19 @@ def get_points_from_csv(file_path, scale_to_um=10,marker_name=None):
     points *= scale_to_um
     return points
 
+def get_points_df_from_csv(file_path, scale_to_um=10,marker_name=None):
+    """
+    Reads points from a CSV file and returns them as a pandas DataFrame.
+    Multiplies coordinates with atlas_pixel_size.
+    XYZ = PIL
+    """
+    df = pd.read_csv(file_path)
+    if marker_name is not None:
+        # Filter the DataFrame based on the marker name
+        df = df[df['marker_name'] == marker_name]
+    df[['ccf_ap', 'ccf_dv', 'ccf_ml']] *= scale_to_um
+    return df
+
 def get_points_from_multiple_csv(file_paths, scale_to_um=10,marker_name=None):
     """
     Reads points from multiple CSV files, concatenates them into a single numpy array,
@@ -36,6 +49,17 @@ def get_points_list_from_multiple_csv(file_paths, scale_to_um=10,marker_name=Non
     for file_path in file_paths:
         points = get_points_from_csv(file_path, scale_to_um=scale_to_um,marker_name=marker_name)
         all_points.append(points)
+    return all_points
+
+def get_points_df_from_multiple_csv(file_paths, scale_to_um=10,marker_name=None):
+    """
+    Reads points from multiple CSV files, concatenates them into a single pandas DataFrame,
+    and multiplies coordinates with scale_to_mm.
+    """
+    all_points = pd.DataFrame()
+    for file_path in file_paths:
+        points = get_points_df_from_csv(file_path, scale_to_um=scale_to_um,marker_name=marker_name)
+        all_points = pd.concat([all_points, points], ignore_index=True)
     return all_points
 
 def ask_csv_file():
