@@ -115,7 +115,13 @@ print("Number of slices: ", mp.getSlices().size())
 
 # Get the directory one level above the abba_file
 project_dir = os.path.dirname(os.path.dirname(abba_file))
-output_folder = Path(os.path.join(project_dir,"output"))
+
+# Ask for the directory for output_path
+output_dir = filedialog.askdirectory(
+    title="Select directory for output path",
+    initialdir=project_dir
+)
+output_folder = Path(os.path.join(output_dir,"output"))
 output_folder.mkdir(exist_ok=True)
 
 scene_number_array = np.full(mp.getSlices().size(), np.nan)
