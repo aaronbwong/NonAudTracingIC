@@ -1,0 +1,11 @@
+name: abba-env
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - openjdk=11
+  - pyimagej
+  - maven
+  - python=3.10
+  - pip:
+    - abba-python==0.10.1.dev0
