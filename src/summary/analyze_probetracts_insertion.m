@@ -1,4 +1,4 @@
-function probe_tracts_tbl = analyze_probetracts_insertion(brain,probe_tracts_tbl)
+function probe_tracts_tbl = analyze_probetracts_insertion(brain,probe_tracts_tbl, depth_offset)
     % ANALYZE_PROBETRACTS_INSERTION 
     % brain: struct containing brain mesh data in ccf coordinates
     % probe_tracts_tbl: table containing information about probe tracts
@@ -10,7 +10,9 @@ function probe_tracts_tbl = analyze_probetracts_insertion(brain,probe_tracts_tbl
     %       as monitored during the recording. Used to estimate actual
     %       position of the probe based on trajectory and location of brain
     %       surface
-    %               
+    % depth_offset: to correct for denting of the brainsurface
+
+    if nargin < 3; depth_offset = 150; end
 
     ccf_scale_um = 1; %um; data scaled in um
     bregma_scale_um = 1; %um; data scaled in um
@@ -63,11 +65,22 @@ function probe_tracts_tbl = analyze_probetracts_insertion(brain,probe_tracts_tbl
         % re-estimate probe tip location by penetration depth
         if contains('tip_depth_rec',probe_tracts_tbl.Properties.VariableNames) ...
             && ~isempty(most_dorsal_point)
-            ccf_tip_calc = most_dorsal_point + direction * probe_tracts_tbl.tip_depth_rec(i_tract);
+            ccf_tip_calc = most_dorsal_point + direction * -(probe_tracts_tbl.tip_depth_rec(i_tract) - depth_offset);
             probe_tracts_tbl.ccf_ap_calc{i_tract} = [most_dorsal_point(:,1); ccf_tip_calc(:,1)];
             probe_tracts_tbl.ccf_ml_calc{i_tract} = [most_dorsal_point(:,2); ccf_tip_calc(:,2)];
             probe_tracts_tbl.ccf_dv_calc{i_tract} = [most_dorsal_point(:,3); ccf_tip_calc(:,3)];
         end
        
+    end
+    % re-estimate probe tip location by penetration depth
+    if contains('tip_depth_rec',probe_tracts_tbl.Properties.VariableNames)
+        probe_tracts_tbl.ccf_ap_histo = probe_tracts_tbl.ccf_ap;
+        probe_tracts_tbl.ccf_ml_histo = probe_tracts_tbl.ccf_ml;
+        probe_tracts_tbl.ccf_dv_histo = probe_tracts_tbl.ccf_dv;
+
+        % replace with calculated values
+        probe_tracts_tbl.ccf_ap = probe_tracts_tbl.ccf_ap_calc;
+        probe_tracts_tbl.ccf_ml = probe_tracts_tbl.ccf_ml_calc;
+        probe_tracts_tbl.ccf_dv = probe_tracts_tbl.ccf_dv_calc;
     end
 end
